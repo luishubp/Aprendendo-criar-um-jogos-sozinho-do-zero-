@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meu Jogo do Zero</title>
+    <style>
+        canvas { border: 2px solid black; background-color: #f0f0f0; display: block; margin: 20px auto; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Use as setas do teclado para mover</h1>
+    <canvas id="jogoCanvas" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("jogoCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let x = 175; // Posição inicial X
+        let y = 175; // Posição inicial Y
+        const velocidade = 5;
+
+        function desenhar() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa a tela
+            ctx.fillStyle = "blue";
+            ctx.fillRect(x, y, 50, 50); // Desenha o jogador
+            requestAnimationFrame(desenhar);
+        }
+
+        window.addEventListener("keydown", (event) => {
+            if(event.key === "ArrowUp") y -= velocidade;
+            if(event.key === "ArrowDown") y += velocidade;
+            if(event.key === "ArrowLeft") x -= velocidade;
+            if(event.key === "ArrowRight") x += velocidade;
+        });
+
+        desenhar();
+    </script>
+</body>
+</html>
+
