@@ -1,31 +1,104 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<!doctype html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Meus Jogos</title>
+  <title>🎮 FNAF HTML</title>
+
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background: #111;
-      color: white;
-      font-family: Arial;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0f1724, #020617);
+      color: #e5e7eb;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      padding: 40px 20px;
       text-align: center;
     }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #22d3ee, #14b8a6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p {
+      color: #9ca3af;
+      margin-bottom: 40px;
+    }
+
+    .grid {
+      display: flex;
+      justify-content: center;
+    }
+
+    .card {
+      background: linear-gradient(180deg, #0b1220, #020617);
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 350px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .icon { font-size: 3.5rem; margin-bottom: 15px; }
+    .title { font-size: 1.4rem; margin-bottom: 10px; }
+    .desc { font-size: 0.95rem; color: #9ca3af; margin-bottom: 25px; }
+
     a {
       display: inline-block;
-      margin: 20px;
-      padding: 15px 30px;
-      background: #ff0055;
-      color: white;
+      padding: 14px 24px;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #14b8a6, #22d3ee);
+      color: #020617;
+      font-weight: bold;
       text-decoration: none;
-      border-radius: 10px;
     }
-    a:hover {
-      background: #ff3377;
+
+    footer {
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: #6b7280;
     }
   </style>
 </head>
+
 <body>
-  <h1>🎮 Meus Jogos</h1>
-  <a href="jogos/fnaf/">Jogar FNAF</a>
+  <div class="container">
+    <h1>🎮 FNAF em HTML</h1>
+    <p>Sobreviva à noite e monitore os animatronics</p>
+
+    <div class="grid">
+      <div class="card">
+        <div class="icon">👁️</div>
+        <div class="title">Night Watch</div>
+        <div class="desc">
+          Fique atento às câmeras, luzes e portas para sobreviver até o amanhecer.
+        </div>
+        <a href="./games/fnaf-night-watch/">Jogar</a>
+      </div>
+    </div>
+
+    <footer>
+      Feito com HTML + JavaScript • GitHub Pages
+    </footer>
+  </div>
 </body>
 </html>
