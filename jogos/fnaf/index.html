@@ -1,19 +1,422 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <title>FNAF Mobile</title>
-  <style>
-    body {
-      background: black;
-      color: red;
-      font-family: Arial;
-      text-align: center;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>FNAF Web Clone - Demo</title>
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            margin: 0;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            margin: 20px auto;
+            border: 5px solid #333;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        /* --- CENÁRIO DO ESCRITÓRIO --- */
+        .office {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #2a2a2a 20%, #000 90%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 50px;
+            box-sizing: border-box;
+        }
+
+        .door-frame {
+            width: 100px;
+            height: 300px;
+            border: 10px solid #444;
+            position: relative;
+            background: #111;
+        }
+
+        .door {
+            width: 100%;
+            height: 100%;
+            background-color: #555;
+            position: absolute;
+            top: -100%; /* Porta aberta (para cima) */
+            transition: top 0.3s;
+            border-bottom: 5px solid yellow;
+        }
+
+        .door.closed {
+            top: 0; /* Porta fechada */
+        }
+
+        .buttons {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            border: 2px solid #fff;
+        }
+
+        .btn-door { background-color: #c00; color: white; }
+        .btn-door.active { background-color: #0f0; color: black; }
+        
+        .btn-light { background-color: #ccc; color: black; display: block; margin: 5px auto; }
+
+        /* --- UI (INTERFACE) --- */
+        .hud {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 20px;
+            color: white;
+            z-index: 10;
+        }
+        
+        .clock {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+        }
+
+        .power-meter {
+            color: yellow;
+        }
+
+        /* --- CÂMERAS --- */
+        #camera-tablet {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 50, 0, 0.9);
+            z-index: 5;
+            display: none; /* Começa escondido */
+            border: 20px solid #222;
+            box-sizing: border-box;
+        }
+
+        .map-room {
+            position: absolute;
+            width: 80px;
+            height: 60px;
+            border: 2px solid #0f0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: #0f0;
+            font-size: 12px;
+        }
+
+        .map-room:hover { background: #004400; }
+
+        /* --- INIMIGOS E SUSTOS --- */
+        .animatronic {
+            width: 30px;
+            height: 30px;
+            background-color: purple; /* Bonnie roxo */
+            border-radius: 50%;
+            display: none; /* Só aparece se estiver na sala */
+        }
+
+        #jumpscare {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 20;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #jumpscare img {
+            width: 80%;
+            height: 80%;
+            background: red; /* Placeholder do monstro */
+        }
+
+        #cam-toggle {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: 2px solid white;
+            z-index: 15;
+            cursor: pointer;
+        }
+
+        /* Luzes do corredor */
+        .corridor-light {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 200, 0.2);
+            pointer-events: none;
+            display: none;
+        }
+
+    </style>
 </head>
 <body>
-  <h1>FNAF - Mobile Edition</h1>
-  <p>Jogo em desenvolvimento 👻</p>
+
+<div id="game-container">
+    
+    <div class="office">
+        <div class="corridor-light" id="light-left"></div>
+        <div class="corridor-light" id="light-right"></div>
+
+        <div class="side">
+            <div class="door-frame">
+                <div class="door" id="door-left"></div>
+            </div>
+            <div class="buttons">
+                <button class="btn-door" onclick="toggleDoor('left')">PORTA</button>
+                <button class="btn-light" onmousedown="toggleLight('left', true)" onmouseup="toggleLight('left', false)">LUZ</button>
+            </div>
+        </div>
+
+        <div class="side">
+            <div class="door-frame">
+                <div class="door" id="door-right"></div>
+            </div>
+            <div class="buttons">
+                <button class="btn-door" onclick="toggleDoor('right')">PORTA</button>
+                <button class="btn-light" onmousedown="toggleLight('right', true)" onmouseup="toggleLight('right', false)">LUZ</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="hud">
+        <div class="power-meter">BATERIA: <span id="power-display">100</span>%</div>
+        <div style="font-size: 14px; color: #888;">USO: <span id="usage-display">1</span></div>
+    </div>
+    <div class="clock"><span id="time-display">12 AM</span></div>
+    
+    <button id="cam-toggle" onclick="toggleCamera()">ABRIR CÂMERAS</button>
+
+    <div id="camera-tablet">
+        <h3 style="color: #0f0; margin: 10px;">CAM SYSTEM</h3>
+        <div id="screen-view" style="width: 400px; height: 300px; border: 1px solid #0f0; margin: 10px auto; display: flex; align-items: center; justify-content: center; color: white;">
+            SEM SINAL...
+        </div>
+
+        <div class="map-room" style="bottom: 50px; left: 350px;" onclick="viewCam('1A')">CAM 1A (Palco)</div>
+        <div class="map-room" style="bottom: 120px; left: 250px;" onclick="viewCam('1B')">CAM 1B (Jantar)</div>
+        <div class="map-room" style="bottom: 150px; left: 150px;" onclick="viewCam('2A')">CAM 2A (Corredor Esq)</div>
+        <div class="map-room" style="bottom: 50px; left: 150px;" onclick="viewCam('2B')">CAM 2B (Porta Esq)</div>
+    </div>
+
+    <div id="jumpscare">
+        <h1 style="color: red; text-align: center;">GAME OVER</h1>
+    </div>
+
+</div>
+
+<script>
+    // --- VARIÁVEIS DO JOGO ---
+    let power = 100;
+    let usage = 1; // 1 = Fan (passivo)
+    let timeHours = 0; // 0 = 12 AM
+    let isCameraOpen = false;
+    let gameOver = false;
+
+    // Estado das Portas (false = aberta, true = fechada)
+    let doors = { left: false, right: false };
+
+    // IA do Inimigo (Bonnie - Esquerda)
+    // 0 = Palco (1A), 1 = Jantar (1B), 2 = Corredor (2A), 3 = Porta (2B), 4 = DENTRO
+    let bonnieLocation = 0; 
+    let bonnieAILevel = 5; // Dificuldade (1-20)
+    let moveTimer = 0;
+
+    // --- LOOP PRINCIPAL ---
+    setInterval(gameLoop, 1000); // Roda a cada 1 segundo
+    setInterval(powerLoop, 5000); // Dreno de energia a cada 5 segs (ajustável)
+
+    function gameLoop() {
+        if (gameOver) return;
+
+        // 1. Relógio
+        if (Math.random() > 0.85) { // Avança o tempo aleatoriamente para simular horas
+            timeHours++;
+            updateTimeUI();
+            if (timeHours >= 6) winGame();
+        }
+
+        // 2. IA do Bonnie (Movimento)
+        moveTimer++;
+        if (moveTimer > 4) { // Tenta mover a cada 4 segundos
+            moveTimer = 0;
+            if (Math.random() * 20 < bonnieAILevel) {
+                moveBonnie();
+            }
+        }
+    }
+
+    function powerLoop() {
+        if (gameOver) return;
+        
+        // Dreno base + portas
+        let drain = 1;
+        if (doors.left) drain++;
+        if (doors.right) drain++;
+        if (isCameraOpen) drain++;
+
+        power -= drain;
+        document.getElementById('usage-display').innerText = drain;
+        
+        if (power <= 0) {
+            power = 0;
+            powerOutage();
+        }
+        document.getElementById('power-display').innerText = power;
+    }
+
+    // --- LÓGICA DO INIMIGO ---
+    function moveBonnie() {
+        // Se já está na porta, tenta atacar
+        if (bonnieLocation === 3) {
+            if (doors.left === false) {
+                // Porta aberta -> Morte
+                triggerJumpscare();
+            } else {
+                // Porta fechada -> Volta para o início
+                bonnieLocation = 1; // Volta pro jantar
+                console.log("Bonnie bloqueado, voltando.");
+            }
+        } else {
+            // Avança uma sala
+            bonnieLocation++;
+        }
+        updateScreenView(); // Atualiza tela se estiver vendo a câmera certa
+    }
+
+    // --- CONTROLES ---
+    function toggleDoor(side) {
+        if (power <= 0 || gameOver) return;
+        doors[side] = !doors[side];
+        
+        let doorElem = document.getElementById('door-' + side);
+        if (doors[side]) {
+            doorElem.classList.add('closed');
+        } else {
+            doorElem.classList.remove('closed');
+        }
+    }
+
+    function toggleLight(side, state) {
+        if (power <= 0 || gameOver) return;
+        let light = document.getElementById('light-' + side);
+        
+        if (state) {
+            light.style.display = 'block';
+            // Checar se Bonnie está na porta (Local 3 é a porta esquerda)
+            if (side === 'left' && bonnieLocation === 3) {
+                // Mostra sombra na porta
+                light.style.background = "rgba(100, 0, 100, 0.5)"; // Roxo
+            } else {
+                light.style.background = "rgba(255, 255, 200, 0.2)"; // Vazio
+            }
+        } else {
+            light.style.display = 'none';
+        }
+    }
+
+    function toggleCamera() {
+        if (power <= 0 || gameOver) return;
+        isCameraOpen = !isCameraOpen;
+        let tablet = document.getElementById('camera-tablet');
+        tablet.style.display = isCameraOpen ? 'block' : 'none';
+        document.getElementById('cam-toggle').innerText = isCameraOpen ? "FECHAR CÂMERAS" : "ABRIR CÂMERAS";
+    }
+
+    function viewCam(camID) {
+        let screen = document.getElementById('screen-view');
+        let text = "SALA VAZIA";
+        
+        // Verifica Bonnie
+        // Mapa: 1A=0, 1B=1, 2A=2, 2B=3
+        if (camID === '1A' && bonnieLocation === 0) text = "BONNIE NO PALCO";
+        if (camID === '1B' && bonnieLocation === 1) text = "BONNIE NO JANTAR";
+        if (camID === '2A' && bonnieLocation === 2) text = "BONNIE NO CORREDOR";
+        if (camID === '2B' && bonnieLocation === 3) text = "BONNIE NA PORTA (PERTO)";
+
+        screen.innerText = `[CAM ${camID}]: ${text}`;
+        screen.style.color = (text.includes("BONNIE")) ? "purple" : "white";
+    }
+
+    function updateScreenView() {
+        if(isCameraOpen) {
+            // Simplesmente limpa a tela para forçar o jogador a clicar de novo ou atualiza automático
+            // Simplificado para essa demo
+        }
+    }
+
+    // --- SISTEMA ---
+    function updateTimeUI() {
+        let display = (timeHours === 0) ? "12 AM" : timeHours + " AM";
+        document.getElementById('time-display').innerText = display;
+    }
+
+    function powerOutage() {
+        // Apaga tudo
+        doors.left = false; doors.right = false; // Portas abrem
+        document.getElementById('door-left').classList.remove('closed');
+        document.getElementById('door-right').classList.remove('closed');
+        isCameraOpen = false;
+        document.getElementById('camera-tablet').style.display = 'none';
+        document.body.style.background = "black";
+        document.querySelector('.office').style.background = "black";
+        
+        // Timer para jumpscare no escuro
+        setTimeout(triggerJumpscare, 3000);
+    }
+
+    function triggerJumpscare() {
+        gameOver = true;
+        let jump = document.getElementById('jumpscare');
+        jump.style.display = 'flex';
+        // Efeito de piscar
+        let flashes = 0;
+        let interval = setInterval(() => {
+            jump.style.backgroundColor = (flashes % 2 === 0) ? "red" : "black";
+            flashes++;
+            if(flashes > 10) {
+                clearInterval(interval);
+                alert("GAME OVER! O Bonnie te pegou.");
+                location.reload();
+            }
+        }, 100);
+    }
+
+    function winGame() {
+        gameOver = true;
+        alert("06:00 AM - VOCÊ SOBREVIVEU!");
+        location.reload();
+    }
+
+</script>
+
 </body>
-</html>
+          </html>
+
